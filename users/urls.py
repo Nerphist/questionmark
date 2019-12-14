@@ -6,6 +6,6 @@ from users.views import RegisterAPIView, LogoutAPIView
 urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='register'),
     path('login/', token_obtain_pair, name='login'),
-    path('api/token/refresh/', token_refresh, name='token_refresh'),
+    path('token/refresh/', token_refresh, name='token_refresh'),
     path('checkAuth/', LogoutAPIView.as_view(), name='check')
 ]
