@@ -10,6 +10,6 @@ git reset --hard origin/$1
 
 source venv/bin/activate
 
-python3 manage.py runserver 10.0.1.129:8888 --noreload
-
 chmod 0775 ./git_update.sh
+
+python3 manage.py runserver 10.0.1.129:8888 --noreload
