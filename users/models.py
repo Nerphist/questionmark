@@ -6,14 +6,6 @@ from django.db import models, transaction
 from utils.models import AbstractCreateUpdateModel
 
 
-class Role(AbstractCreateUpdateModel):
-    class Meta(AbstractCreateUpdateModel.Meta):
-        db_table = 'roles'
-
-    name = models.CharField(max_length=64, unique=False, blank=False, default="")
-    slug = models.CharField(max_length=64, unique=True, blank=True, db_index=True)
-
-
 class UserManager(BaseUserManager):
 
     def _create_user(self, email, password, **extra_fields):
@@ -32,11 +24,13 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin, AbstractCreateUpdateModel):
+    class Meta(AbstractCreateUpdateModel.Meta):
+        db_table = 'users'
+
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     email = models.EmailField(max_length=64, unique=True)
-    role = models.ForeignKey(Role, on_delete=models.SET_DEFAULT, default=1)
 
     objects = UserManager()
 
@@ -48,10 +42,23 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self
 
 
-class AssistantTeacher(AbstractCreateUpdateModel):
+class Teacher(AbstractCreateUpdateModel):
     class Meta(AbstractCreateUpdateModel.Meta):
-        db_table = 'assistant_teacher'
-        unique_together = ('teacher_id', 'assistant_id')
+        db_table = 'teachers'
 
-    teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teacher')
-    assistant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assistant')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, unique=True, related_name='teacher')
+
+
+class Assistant(AbstractCreateUpdateModel):
+    class Meta(AbstractCreateUpdateModel.Meta):
+        db_table = 'assistants'
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, unique=True, related_name='assistant')
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, null=False, related_name='assistants')
+
+
+class Student(AbstractCreateUpdateModel):
+    class Meta(AbstractCreateUpdateModel.Meta):
+        db_table = 'students'
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, unique=True, related_name='student')
