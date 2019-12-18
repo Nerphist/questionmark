@@ -36,7 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     email = models.EmailField(max_length=64, unique=True)
-    role = models.ForeignKey(Role, null=True, on_delete=models.SET_NULL)
+    role = models.ForeignKey(Role, on_delete=models.SET_DEFAULT, default=1)
 
     objects = UserManager()
 
@@ -46,3 +46,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         super(User, self).save(*args, **kwargs)
         return self
+
+
+class AssistantTeacher(AbstractCreateUpdateModel):
+    class Meta(AbstractCreateUpdateModel.Meta):
+        db_table = 'assistant_teacher'
+        unique_together = ('teacher_id', 'assistant_id')
+
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teacher')
+    assistant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assistant')
