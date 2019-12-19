@@ -6,17 +6,14 @@ from users.views import *
 urlpatterns = [
     path('login/', token_obtain_pair, name='login'),
     path('students/', StudentView.as_view({
-        'get': 'list',
         'post': 'create',
     }), name='students'),
     path('teachers/', TeacherView.as_view({
-        'get': 'list',
         'post': 'create',
-    }), name='students'),
+    }), name='teachers'),
     path('assistants/', AssistantView.as_view({
-        'get': 'list',
         'post': 'create',
-    }), name='students'),
+    }), name='assistants'),
     path('token/refresh/', token_refresh, name='token_refresh'),
     path('checkAuth/', LogoutAPIView.as_view(), name='check')
 ]

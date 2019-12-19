@@ -18,8 +18,10 @@ from django.urls import include
 
 from questionmark.views import get_all_methods
 from users.urls import urlpatterns as auth_urls
+from api_tests.urls import urlpatterns as test_urls
 
 urlpatterns = [
     url(r'^auth/', include(auth_urls)),
+    url(r'^test-api/', include(test_urls)),
     url(r'^$', get_all_methods, name='get_all_urls')
 ]

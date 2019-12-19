@@ -22,12 +22,10 @@ class TeacherView(ModelViewSet):
 
 class AssistantView(ModelViewSet):
     queryset = Assistant.objects.all()
-    permission_classes = (AllowAny,)
     serializer_class = AssistantSerializer
 
 
 class LogoutAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         return Response(status=status.HTTP_200_OK)
