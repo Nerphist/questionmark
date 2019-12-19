@@ -17,7 +17,7 @@ class SubCategory(AbstractCreateUpdateModel):
         db_table = 'sub_categories'
         unique_together = [['name', 'category']]
 
-    name = models.CharField(max_length=255, null=False, db_index=True, unique=True)
+    name = models.CharField(max_length=255, null=False, db_index=True)
     category = models.ForeignKey(Category, null=False, on_delete=models.CASCADE, related_name='sub_categories')
 
 
@@ -28,15 +28,17 @@ class Test(AbstractCreateUpdateModel):
     name = models.CharField(max_length=255, null=False, db_index=True, unique=True)
     information = models.TextField(null=False, blank=True)
     creator = models.ForeignKey(Teacher, null=True, on_delete=models.SET_NULL, related_name='tests')
-    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, related_name='tests')
 
 
 class Question(AbstractCreateUpdateModel):
     class Meta(AbstractCreateUpdateModel.Meta):
         db_table = 'questions'
+        unique_together = [['category', 'name']]
 
     name = models.CharField(max_length=255, null=False)
     text = models.TextField(blank=True)
+    test = models.ForeignKey(Test, null=False, on_delete=models.CASCADE, related_name='questions')
     category = models.ForeignKey(SubCategory, null=True, on_delete=models.SET_NULL, related_name='questions')
 
 

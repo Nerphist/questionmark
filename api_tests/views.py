@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
 
 from api_tests.serializers import *
 
@@ -22,6 +23,7 @@ class SubCategoryView(viewsets.ModelViewSet):
 
 
 class QuestionView(viewsets.ModelViewSet):
+    permission_classes = (AllowAny, )
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
 
