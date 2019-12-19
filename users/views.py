@@ -8,17 +8,6 @@ from users.models import User, Student, Teacher, Assistant
 from users.serializers import UserSerializer, StudentSerializer, TeacherSerializer, AssistantSerializer
 
 
-class RegisterAPIView(APIView):
-    permission_classes = (AllowAny,)
-
-    def post(self, request):
-        user = request.data
-        serializer = UserSerializer(data=user)
-        serializer.is_valid(raise_exception=True)
-        user_object = serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
 class StudentView(ModelViewSet):
     queryset = Student.objects.all()
     permission_classes = (AllowAny,)

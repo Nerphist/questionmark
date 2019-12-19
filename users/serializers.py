@@ -14,46 +14,30 @@ class UserSerializer(serializers.ModelSerializer):
         return make_password(value)
 
 
-class StudentSerializer(serializers.ModelSerializer):
+class FromUserSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False)
 
+    def create(self, validated_data: dict):
+        user = validated_data.pop('user')
+        user = User.objects.create(**user)
+        validated_data['user'] = user
+        student = self.Meta.model.objects.create(**validated_data)
+        return student
+
+
+class StudentSerializer(FromUserSerializer):
     class Meta:
         model = Student
         fields = ['user', ]
 
-    def create(self, validated_data: dict):
-        user = validated_data.pop('user')
-        user = User.objects.create(**user)
-        validated_data['user'] = user
-        student = Student.objects.create(**validated_data)
-        return student
 
-
-class TeacherSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=False)
-
+class TeacherSerializer(FromUserSerializer):
     class Meta:
-        fields = ['user', ]
         model = Teacher
-
-    def create(self, validated_data: dict):
-        user = validated_data.pop('user')
-        user = User.objects.create(**user)
-        validated_data['user'] = user
-        teacher = Teacher.objects.create(**validated_data)
-        return teacher
+        fields = ['user', ]
 
 
-class AssistantSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=False)
-
+class AssistantSerializer(FromUserSerializer):
     class Meta:
         model = Assistant
         fields = ['user', 'teacher', ]
-
-    def create(self, validated_data: dict):
-        user = validated_data.pop('user')
-        user = User.objects.create(**user)
-        validated_data['user'] = user
-        assistant = Assistant.objects.create(**validated_data)
-        return assistant
