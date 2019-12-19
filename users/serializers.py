@@ -28,16 +28,16 @@ class FromUserSerializer(serializers.ModelSerializer):
 class StudentSerializer(FromUserSerializer):
     class Meta:
         model = Student
-        fields = ['user', ]
+        fields = ['id', 'user', ]
 
 
 class TeacherSerializer(FromUserSerializer):
     class Meta:
         model = Teacher
-        fields = ['user', ]
+        fields = ['id', 'user', ]
 
 
 class AssistantSerializer(FromUserSerializer):
     class Meta:
         model = Assistant
-        fields = ['user', 'teacher', ]
+        fields = ['id', 'user', 'teacher', ]

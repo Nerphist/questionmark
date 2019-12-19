@@ -10,6 +10,7 @@ urlpatterns = [
     }), name='students'),
     path('teachers/', TeacherView.as_view({
         'post': 'create',
+        'get': 'list',
     }), name='teachers'),
     path('assistants/', AssistantView.as_view({
         'post': 'create',
