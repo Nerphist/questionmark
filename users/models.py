@@ -41,6 +41,24 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractCreateUpdateModel):
         super(User, self).save(*args, **kwargs)
         return self
 
+    def is_teacher(self):
+        try:
+            return self.teacher
+        except Teacher.DoesNotExist:
+            return False
+
+    def is_assitant(self):
+        try:
+            return self.assistant
+        except Assistant.DoesNotExist:
+            return False
+
+    def is_student(self):
+        try:
+            return self.student
+        except Student.DoesNotExist:
+            return False
+
 
 class Teacher(AbstractCreateUpdateModel):
     class Meta(AbstractCreateUpdateModel.Meta):
