@@ -8,6 +8,9 @@ urlpatterns = [
         'put': 'update',
         'get': 'list',
     }), name='tests'),
+    path('tests/<int:pk>/', TestView.as_view({
+        'get': 'retrieve',
+    }), name='retrieve test'),
     path('categories/', CategoryView.as_view({
         'post': 'create',
         'get': 'list',

@@ -43,19 +43,19 @@ class User(AbstractBaseUser, PermissionsMixin, AbstractCreateUpdateModel):
 
     def is_teacher(self):
         try:
-            return self.teacher
+            return bool(self.teacher)
         except Teacher.DoesNotExist:
             return False
 
     def is_assitant(self):
         try:
-            return self.assistant
+            return bool(self.assistant)
         except Assistant.DoesNotExist:
             return False
 
     def is_student(self):
         try:
-            return self.student
+            return bool(self.student)
         except Student.DoesNotExist:
             return False
 
