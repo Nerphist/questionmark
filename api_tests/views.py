@@ -2,12 +2,14 @@ from functools import reduce
 
 from django.db.models import Q
 from rest_framework import viewsets, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from api_tests.serializers import *
-from utils.permissions import IsTeacherPost, IsAssistantOrTeacherPost, allow_test_modification
+from users.models import User
+from utils.permissions import IsTeacherPost, IsAssistantOrTeacherPostPutDelete, allow_test_modification
 
 
 class TestView(viewsets.ModelViewSet):
@@ -28,6 +30,13 @@ class TestView(viewsets.ModelViewSet):
         tests = Test.objects
         filters = []
         params = request.query_params
+        if params.get('individual'):
+            if request.user.is_teacher():
+                filters.append(Q(creator_id=request.user.teacher.id))
+            elif request.user.is_assitant():
+                filters.append(Q(creator_id=request.user.assistant.teacher.id))
+            else:
+                tests = request.user.student.tests
         if params.get('teacher_id'):
             filters.append(Q(creator_id=params.get('teacher_id')))
         if params.get('category_id'):
@@ -72,7 +81,7 @@ class SubCategoryView(viewsets.ModelViewSet):
 
 
 class QuestionView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsAssistantOrTeacherPost)
+    permission_classes = (IsAuthenticated, IsAssistantOrTeacherPostPutDelete)
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
 
@@ -103,7 +112,7 @@ class QuestionView(viewsets.ModelViewSet):
 
 
 class AnswerView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsAssistantOrTeacherPost)
+    permission_classes = (IsAuthenticated, IsAssistantOrTeacherPostPutDelete)
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
 
@@ -131,3 +140,25 @@ class AnswerView(viewsets.ModelViewSet):
             return Response(data={'detail': 'Only teacher and his assistants can update'},
                             status=status.HTTP_403_FORBIDDEN)
         return super().update(request, args, kwargs)
+
+
+@api_view(['DELETE', 'POST'])
+@permission_classes([IsAuthenticated, IsAssistantOrTeacherPostPutDelete])
+def allow_test(request: Request, *args, **kwargs):
+    data = request.data
+    print(data)
+    user = User.objects.filter(email=data.get('email')).first()
+    if not user:
+        return Response(data={'detail': 'No users with such email'}, status=status.HTTP_404_NOT_FOUND)
+    if not user.is_student():
+        return Response(data={'detail': 'The user is not a student'}, status=status.HTTP_400_BAD_REQUEST)
+    if not request.get('test_id'):
+        return Response(data={'detail': 'Test id was not provided'}, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'POST':
+        StudentTest.objects.create(student=user.student, test_id=request.get('test_id'))
+    if request.method == 'DELETE':
+        try:
+            StudentTest.objects.get(student=user.student, test_id=request.get('test_id')).delete()
+        except:
+            return Response({'detail': 'Bad info'}, status.HTTP_400_BAD_REQUEST)
+    return Response(data={}, status=status.HTTP_201_CREATED)

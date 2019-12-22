@@ -5,15 +5,14 @@ class IsTeacherPost(BasePermission):
     message = 'The user is not a teacher'
 
     def has_permission(self, request, view):
-        return request.user.is_teacher() if request.method == 'POST' else True
+        return request.user.is_teacher() if request.method in ['POST', 'PUT', 'DELETE'] else True
 
 
-class IsAssistantOrTeacherPost(BasePermission):
+class IsAssistantOrTeacherPostPutDelete(BasePermission):
     message = 'Only teacher and his assistants can create'
 
     def has_permission(self, request, view):
-        print(view.queryset)
-        return (request.user.is_teacher() or request.user.is_assitant()) if request.method == 'POST' else True
+        return (request.user.is_teacher() or request.user.is_assitant()) if request.method in ['POST', 'PUT', 'DELETE'] else True
 
 
 class IsStudent(BasePermission):

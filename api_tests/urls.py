@@ -29,4 +29,5 @@ urlpatterns = [
         'put': 'update',
         'get': 'list',
     }), name='answers'),
+    path('allow-test/', allow_test, name='allow_test'),
 ]

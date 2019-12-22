@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-from users.models import Teacher
+from users.models import Teacher, Student
 from utils.models import AbstractCreateUpdateModel
 
 
@@ -40,6 +40,7 @@ class Question(AbstractCreateUpdateModel):
     text = models.TextField(blank=True)
     test = models.ForeignKey(Test, null=False, on_delete=models.CASCADE, related_name='questions')
     category = models.ForeignKey(SubCategory, null=True, on_delete=models.SET_NULL, related_name='questions')
+    position = models.IntegerField(null=False, default=1)
 
 
 class Answer(AbstractCreateUpdateModel):
@@ -50,3 +51,12 @@ class Answer(AbstractCreateUpdateModel):
     text = models.TextField(null=False)
     question = models.ForeignKey(Question, null=False, on_delete=models.CASCADE, related_name='answers')
     is_right = models.BooleanField(default=False)
+
+
+class StudentTest(AbstractCreateUpdateModel):
+    class Meta(AbstractCreateUpdateModel.Meta):
+        db_table = 'student_tests'
+        unique_together = [['test', 'student']]
+
+    test = models.ForeignKey(Test, null=False, on_delete=models.CASCADE, related_name='students')
+    student = models.ForeignKey(Student, null=False, on_delete=models.CASCADE, related_name='tests')
