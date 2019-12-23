@@ -12,7 +12,8 @@ class IsAssistantOrTeacherPostPutDelete(BasePermission):
     message = 'Only teacher and his assistants can create'
 
     def has_permission(self, request, view):
-        return (request.user.is_teacher() or request.user.is_assitant()) if request.method in ['POST', 'PUT', 'DELETE'] else True
+        return (request.user.is_teacher() or request.user.is_assistant()) if request.method in ['POST', 'PUT',
+                                                                                                'DELETE'] else True
 
 
 class IsStudent(BasePermission):
@@ -23,7 +24,7 @@ class IsStudent(BasePermission):
 
 
 def allow_test_modification(user, test):
-    if (user.is_assitant() and user.assistant.teacher_id != test.creator_id) or \
+    if (user.is_assistant() and user.assistant.teacher_id != test.creator_id) or \
             (user.is_teacher() and user.teacher.id != test.creator_id):
         return False
     return True

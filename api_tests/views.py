@@ -33,7 +33,7 @@ class TestView(viewsets.ModelViewSet):
         if params.get('individual'):
             if request.user.is_teacher():
                 filters.append(Q(creator_id=request.user.teacher.id))
-            elif request.user.is_assitant():
+            elif request.user.is_assistant():
                 filters.append(Q(creator_id=request.user.assistant.teacher.id))
             else:
                 tests = request.user.student.tests
@@ -124,7 +124,7 @@ class AnswerView(viewsets.ModelViewSet):
             filters.append(Q(question_id=params.get('question_id')))
         if filters:
             answers = answers.filter(reduce(lambda x, y: x & y, filters))
-        answers = [QuestionSerializer(answer).data for answer in answers.all()]
+        answers = [AnswerSerializer(answer).data for answer in answers.all()]
         return Response(data=answers, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
@@ -146,19 +146,20 @@ class AnswerView(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated, IsAssistantOrTeacherPostPutDelete])
 def allow_test(request: Request, *args, **kwargs):
     data = request.data
-    print(data)
     user = User.objects.filter(email=data.get('email')).first()
-    if not user:
-        return Response(data={'detail': 'No users with such email'}, status=status.HTTP_404_NOT_FOUND)
+    test = Test.objects.filter(id=data.get('test_id')).first()
+    if not user or not test:
+        return Response(data={'detail': 'Some of the resources do not exist'}, status=status.HTTP_400_BAD_REQUEST)
     if not user.is_student():
         return Response(data={'detail': 'The user is not a student'}, status=status.HTTP_400_BAD_REQUEST)
-    if not request.get('test_id'):
-        return Response(data={'detail': 'Test id was not provided'}, status=status.HTTP_400_BAD_REQUEST)
     if request.method == 'POST':
-        StudentTest.objects.create(student=user.student, test_id=request.get('test_id'))
+        try:
+            StudentTest.objects.create(student=user.student, test_id=data.get('test_id'))
+        except Exception as e:
+            return Response({'detail': str(e)}, status.HTTP_400_BAD_REQUEST)
     if request.method == 'DELETE':
         try:
-            StudentTest.objects.get(student=user.student, test_id=request.get('test_id')).delete()
-        except:
-            return Response({'detail': 'Bad info'}, status.HTTP_400_BAD_REQUEST)
-    return Response(data={}, status=status.HTTP_201_CREATED)
+            StudentTest.objects.get(student=user.student, test_id=data.get('test_id')).delete()
+        except Exception as e:
+            return Response({'detail': str(e)}, status.HTTP_400_BAD_REQUEST)
+    return Response(data={'result': 'success'}, status=status.HTTP_201_CREATED)
