@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'users',
     'api_tests',
     'utils',
+    'analytics',
     'corsheaders',
 ]
 
@@ -104,7 +105,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=23),
     'REFRESH_TOKEN_LIFETIME': timedelta(hours=24),
 }
 
