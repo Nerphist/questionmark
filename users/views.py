@@ -23,9 +23,3 @@ class TeacherView(ModelViewSet):
 class AssistantView(ModelViewSet):
     queryset = Assistant.objects.all()
     serializer_class = AssistantSerializer
-
-
-class LogoutAPIView(APIView):
-
-    def get(self, request):
-        return Response(status=status.HTTP_200_OK)

@@ -41,3 +41,7 @@ class AssistantSerializer(FromUserSerializer):
     class Meta:
         model = Assistant
         fields = ['id', 'user', 'teacher', ]
+
+    def to_internal_value(self, data):
+        data.update({'teacher': self.context['request'].user.teacher.id})
+        return super().to_internal_value(data)

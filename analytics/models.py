@@ -32,7 +32,6 @@ class SolvedQuestion(AbstractCreateUpdateModel):
     def set_correct(self):
         self.correct = list(map(lambda x: x.answer.is_right, self.solved_answers.all())) == list(
             map(lambda x: x.is_right, self.question.answers.all()))
-        print(self.correct)
         self.save()
 
 
@@ -55,7 +54,6 @@ class SolvedAnswer(AbstractCreateUpdateModel):
         question = self.solved_question
         test = self.solved_question.solved_test
         deleted = super().delete(using, keep_parents)
-
         question.set_correct()
         test.set_mark()
         return deleted

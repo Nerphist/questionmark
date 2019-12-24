@@ -16,5 +16,4 @@ urlpatterns = [
         'post': 'create',
     }), name='assistants'),
     path('token/refresh/', token_refresh, name='token_refresh'),
-    path('checkAuth/', LogoutAPIView.as_view(), name='check')
 ]
