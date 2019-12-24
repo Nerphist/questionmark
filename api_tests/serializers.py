@@ -26,19 +26,12 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    class CategorySerializer(SubCategorySerializer):
-        class Meta(SubCategorySerializer.Meta):
-            validators = []
-
-    category = CategorySerializer()
+    category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), required=False, allow_null=True,
+                                                  default=None)
 
     class Meta:
         model = Question
         fields = ['id', 'name', 'text', 'category', 'test']
-
-    def validate_category(self, value):
-        sub_category = SubCategory.objects.filter(category=value.get('category'), name=value.get('name')).first()
-        return sub_category
 
 
 class AnswerSerializer(serializers.ModelSerializer):
