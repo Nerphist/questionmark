@@ -51,6 +51,7 @@ class Answer(AbstractCreateUpdateModel):
     text = models.TextField(null=False)
     question = models.ForeignKey(Question, null=False, on_delete=models.CASCADE, related_name='answers')
     is_right = models.BooleanField(default=False)
+    position = models.IntegerField(null=False, default=1)
 
 
 class StudentTest(AbstractCreateUpdateModel):
