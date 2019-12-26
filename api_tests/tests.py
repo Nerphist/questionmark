@@ -26,6 +26,7 @@ class TestApiTest(APITestCase):
             'text': 'Who is this?',
             'category': 'toBeUpdated',
             'test': 'toBeUpdated',
+            'position': 1
         }
         self.question_no_cat = {
             'name': 'Second question',
@@ -149,8 +150,7 @@ class TestApiTest(APITestCase):
             data=answer,
             format='json'
         )
-        print(*Answer.objects.all())
-        print(pk)
+        print([a.position for a in Answer.objects.all()])
         assert Answer.objects.get(id=pk).position == 1
         assert len(set(a.position for a in Answer.objects.filter(question_id=answer['question']).all())) == len(
             self.answers)

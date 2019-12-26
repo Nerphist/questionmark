@@ -95,7 +95,23 @@ class QuestionView(viewsets.ModelViewSet):
         if not allow_test_modification(request.user, Test.objects.get(id=request.data.get('test'))):
             return Response(data={'detail': 'Only teacher and his assistants can update'},
                             status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, args, kwargs)
+        instance = self.get_object()
+        serializer: QuestionSerializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_position = request.data['position']
+        question = Question.objects.get(id=self.kwargs.get('pk'))
+        if new_position > question.position:
+            for ans in Question.objects.filter(position__in=range(question.position, new_position + 1)).exclude(
+                    id=question.id):
+                ans.position -= 1
+                ans.save()
+        elif new_position < question.position:
+            for ans in Question.objects.filter(position__in=range(new_position - 1, question.position)).exclude(
+                    id=question.id):
+                ans.position += 1
+                ans.save()
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
     def list(self, request: Request, *args, **kwargs):
         questions = Question.objects
@@ -144,12 +160,28 @@ class AnswerView(viewsets.ModelViewSet):
                             status=status.HTTP_403_FORBIDDEN)
         return super().create(request, args, kwargs)
 
-    def update(self, request, *args, **kwargs):
+    def update(self, request:Request, *args, **kwargs):
         if not allow_test_modification(request.user, Test.objects.get(
                 id=Question.objects.get(id=request.data.get('question')).test_id)):
             return Response(data={'detail': 'Only teacher and his assistants can update'},
                             status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, args, kwargs)
+        instance = self.get_object()
+        serializer: AnswerSerializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_position = request.data['position']
+        answer = Answer.objects.get(id=self.kwargs.get('pk'))
+        if new_position > answer.position:
+            for ans in Answer.objects.filter(position__in=range(answer.position, new_position + 1)).exclude(
+                    id=answer.id):
+                ans.position -= 1
+                ans.save()
+        elif new_position < answer.position:
+            for ans in Answer.objects.filter(position__in=range(new_position - 1, answer.position)).exclude(
+                    id=answer.id):
+                ans.position += 1
+                ans.save()
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 @api_view(['DELETE', 'POST'])
