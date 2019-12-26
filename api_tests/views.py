@@ -100,13 +100,18 @@ class QuestionView(viewsets.ModelViewSet):
     def list(self, request: Request, *args, **kwargs):
         questions = Question.objects
         filters = []
+        ordering = []
         params = request.query_params
         if params.get('test_id'):
             filters.append(Q(test_id=params.get('test_id')))
         if params.get('sub_category_id'):
             filters.append(Q(category_id=params.get('sub_category_id')))
+        if params.get('sort_by_position'):
+            ordering.append('position')
         if filters:
             questions = questions.filter(reduce(lambda x, y: x & y, filters))
+        if ordering:
+            questions = questions.order_by(*ordering)
         questions = [QuestionSerializer(question).data for question in questions.all()]
         return Response(data=questions, status=status.HTTP_200_OK)
 
@@ -119,11 +124,16 @@ class AnswerView(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         answers = Answer.objects
         filters = []
+        ordering = []
         params = request.query_params
         if params.get('question_id'):
             filters.append(Q(question_id=params.get('question_id')))
         if filters:
             answers = answers.filter(reduce(lambda x, y: x & y, filters))
+        if params.get('sort_by_position'):
+            ordering.append('position')
+        if ordering:
+            answers = answers.order_by(*ordering)
         answers = [AnswerSerializer(answer).data for answer in answers.all()]
         return Response(data=answers, status=status.HTTP_200_OK)
 

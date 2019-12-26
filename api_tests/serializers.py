@@ -28,6 +28,8 @@ class SubCategorySerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), required=False, allow_null=True,
                                                   default=None)
+    position = serializers.ModelField(Question()._meta.get_field('position'), required=False, allow_null=True,
+                                      default=1)
 
     class Meta:
         model = Question
@@ -35,6 +37,8 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class AnswerSerializer(serializers.ModelSerializer):
+    position = serializers.ModelField(Answer()._meta.get_field('position'), required=False, allow_null=True, default=1)
+
     class Meta:
         model = Answer
         fields = ['id', 'question', 'is_right', 'text', 'position']

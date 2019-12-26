@@ -25,23 +25,19 @@ class TestApiTest(APITestCase):
             'name': 'First question',
             'text': 'Who is this?',
             'category': 'toBeUpdated',
-            'test': 'toBeUpdated'
+            'test': 'toBeUpdated',
         }
         self.question_no_cat = {
             'name': 'Second question',
             'text': 'Who is this?',
-            'test': 'toBeUpdated'
+            'test': 'toBeUpdated',
         }
-        self.answer1 = {
-            'is_right': True,
-            'text': 'Answer1',
-            'question': 'toBeUpdated'
-        }
-        self.answer2 = {
-            'is_right': False,
-            'text': 'Answer2',
-            'question': 'toBeUpdated'
-        }
+        self.answers = [{
+            'is_right': i == 2,
+            'text': 'Answer %s' % i,
+            'question': 'toBeUpdated',
+            'position': i, }
+            for i in range(1, 5)]
         data = {
             'first_name': 'name',
             'last_name': 'name',
@@ -128,20 +124,34 @@ class TestApiTest(APITestCase):
 
         return question
 
-    def test_create_answer(self):
+    def test_create_answers(self):
         question = self.test_create_question()
-        self.answer1['question'] = question.id
-        self.answer2['question'] = question.id
-        response = self.client.post(
-            path=reverse('answers'),
-            data=self.answer1,
+        response = None
+        for answer in self.answers:
+            answer['question'] = question.id
+            response = self.client.post(
+                path=reverse('answers'),
+                data=answer,
+                format='json'
+            )
+            assert response.status_code == status.HTTP_201_CREATED
+        assert len(Answer.objects.all()) == len(self.answers)
+        assert response is not None
+        return response.data
+
+    def test_update_answer(self):
+        response = self.test_create_answers()
+        answer = self.answers[-1]
+        answer['position'] = 1
+        pk = response.get('id')
+        response = self.client.put(
+            path=reverse('answer by id', kwargs={'pk': pk}),
+            data=answer,
             format='json'
         )
-        assert response.status_code == status.HTTP_201_CREATED
-        assert Answer.objects.first() is not None
-        response = self.client.post(
-            path=reverse('answers'),
-            data=self.answer2,
-            format='json'
-        )
-        assert len(Answer.objects.all()) == 2
+        print(*Answer.objects.all())
+        print(pk)
+        assert Answer.objects.get(id=pk).position == 1
+        assert len(set(a.position for a in Answer.objects.filter(question_id=answer['question']).all())) == len(
+            self.answers)
+        assert response.status_code == status.HTTP_200_OK
