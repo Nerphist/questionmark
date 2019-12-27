@@ -10,7 +10,8 @@ class SolvedTest(AbstractCreateUpdateModel):
         unique_together = [['test', 'student']]
 
     test = models.ForeignKey(Test, null=False, on_delete=models.CASCADE, db_index=True, related_name='solutions')
-    student = models.ForeignKey(Student, null=True, on_delete=models.SET_NULL, db_index=True,
+    student = models.ForeignKey(Student, null=True, on_delete=models.SET_DEFAULT,
+                                default=Student.get_anonymous_student, db_index=True,
                                 related_name='solved_tests')
     mark = models.IntegerField(default=0)
     is_checked = models.BooleanField(default=False)

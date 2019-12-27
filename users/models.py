@@ -1,4 +1,5 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models, transaction
 
@@ -80,3 +81,7 @@ class Student(AbstractCreateUpdateModel):
         db_table = 'students'
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, unique=True, related_name='student')
+
+    @classmethod
+    def get_anonymous_student(cls):
+        return cls.objects.get(user__email='anonymous@mail.com').id
