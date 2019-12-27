@@ -28,5 +28,5 @@ urlpatterns = [
         'get': 'retrieve',
         'delete': 'destroy',
     }), name='solved answers id'),
-    path('finish-test', finish_test, name='finish test'),
+    path('finish-test/', finish_test, name='finish test'),
 ]
