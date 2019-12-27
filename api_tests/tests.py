@@ -79,6 +79,12 @@ class TestApiTest(APITestCase):
             data=self.test,
             format='json'
         )
+        self.test['name'] = 'tesst'
+        self.client.post(
+            path=reverse('tests'),
+            data=self.test,
+            format='json'
+        )
         assert response.status_code == status.HTTP_201_CREATED
         test = Test.objects.first()
         assert test is not None

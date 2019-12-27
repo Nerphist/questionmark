@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'users',
     'api_tests',
     'utils',
-    'analytics',
+    'analytics.apps.AnalyticsConfig',
     'corsheaders',
 ]
 

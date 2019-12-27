@@ -45,7 +45,15 @@ class AnalyticsTest(APITestCase):
         response = self.test_api.client.post(
             path=reverse('allow_test'),
             data={
-                'test': Test.objects.first().id,
+                'test': Test.objects.all()[0].id,
+                'student': self.data['email']
+            },
+            format='json'
+        )
+        self.test_api.client.post(
+            path=reverse('allow_test'),
+            data={
+                'test': Test.objects.all()[1].id,
                 'student': self.data['email']
             },
             format='json'
@@ -58,7 +66,7 @@ class AnalyticsTest(APITestCase):
         response = self.client.post(
             path=reverse('solved tests'),
             data={
-                'test': StudentTest.objects.get(id=test_id).test.id,
+                'test': StudentTest.objects.all()[0].test.id,
             },
             format='json'
         )
@@ -80,7 +88,7 @@ class AnalyticsTest(APITestCase):
 
     def test_answer_questions(self):
         question_id = self.test_start_questions()
-        for answer in filter(lambda x:x['is_right'], self.test_api.answers):
+        for answer in filter(lambda x: x['is_right'], self.test_api.answers):
             response = self.client.post(
                 path=reverse('solved answers'),
                 data={
@@ -113,4 +121,3 @@ class AnalyticsTest(APITestCase):
         response = self.test_api.client.get(
             path=reverse('solved tests')
         )
-        print(response.data)

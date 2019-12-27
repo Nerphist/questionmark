@@ -1,3 +1,5 @@
+from django.db.models import UniqueConstraint, Q
+
 from api_tests.models import Test, Question, Answer
 from users.models import Student
 from utils.models import AbstractCreateUpdateModel
@@ -7,7 +9,8 @@ from django.db import models
 class SolvedTest(AbstractCreateUpdateModel):
     class Meta(AbstractCreateUpdateModel.Meta):
         db_table = 'solved_tests'
-        unique_together = [['test', 'student']]
+        constraints = [
+            UniqueConstraint(fields=['test', 'student'], condition=Q(is_checked=False), name='only_one_test')]
 
     test = models.ForeignKey(Test, null=False, on_delete=models.CASCADE, db_index=True, related_name='solutions')
     student = models.ForeignKey(Student, null=True, on_delete=models.SET_DEFAULT,
