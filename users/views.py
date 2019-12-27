@@ -1,3 +1,6 @@
+import threading
+import time
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -31,3 +34,15 @@ class AssistantView(ModelViewSet):
 @permission_classes([AllowAny])
 def anonymous_user(request: Request, *args, **kwargs):
     pass
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_role(request: Request, *args, **kwargs):
+    if request.user.is_teacher():
+        role = 'teacher'
+    elif request.user.is_assistant():
+        role = 'assistant'
+    else:
+        role = 'student'
+    return Response({'role': role}, status=status.HTTP_200_OK)

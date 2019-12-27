@@ -37,7 +37,7 @@ class TestView(viewsets.ModelViewSet):
             elif request.user.is_assistant():
                 filters.append(Q(creator_id=request.user.assistant.teacher.id))
             else:
-                tests = request.user.student.tests
+                filters.append(Q(id__in=list(map(lambda x: x.test_id, request.user.student.tests.all()))))
         if params.get('teacher_id'):
             filters.append(Q(creator_id=params.get('teacher_id')))
         if params.get('category_id'):
@@ -208,4 +208,3 @@ def allow_test(request: Request, *args, **kwargs):
         except Exception as e:
             return Response({'detail': str(e)}, status.HTTP_400_BAD_REQUEST)
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
