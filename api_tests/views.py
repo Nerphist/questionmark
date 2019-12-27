@@ -125,10 +125,19 @@ class QuestionView(viewsets.ModelViewSet):
             filters.append(Q(category_id=params.get('sub_category_id')))
         if params.get('sort_by_position'):
             ordering.append('position')
+        if request.user.is_student():
+            test_id = params.get('test_id')
+            test_in_progress = SolvedTest.objects.filter(student=request.user.student, test_id=test_id,
+                                                         is_checked=False).first()
+            if test_in_progress:
+                questions = [q.question_id for q in test_in_progress.solved_questions.all()]
+                if questions:
+                    filters.append(~Q(id__in=questions))
         if filters:
             questions = questions.filter(reduce(lambda x, y: x & y, filters))
         if ordering:
             questions = questions.order_by(*ordering)
+
         questions = [QuestionSerializer(question).data for question in questions.all()]
         return Response(data=questions, status=status.HTTP_200_OK)
 
