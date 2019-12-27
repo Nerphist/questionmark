@@ -112,6 +112,7 @@ class TestApiTest(APITestCase):
         question = Question.objects.first()
         assert question is not None
         assert question.category is not None
+        self.question.update({'id': response.data.get('id')})
 
         response = self.client.post(
             path=reverse('questions'),
@@ -122,6 +123,7 @@ class TestApiTest(APITestCase):
         question_no_cat = Question.objects.filter(name=self.question_no_cat.get('name')).first()
         assert question_no_cat is not None
         assert question_no_cat.category is None
+        self.question_no_cat.update({'id': response.data.get('id')})
 
         return question
 
@@ -136,6 +138,7 @@ class TestApiTest(APITestCase):
                 format='json'
             )
             assert response.status_code == status.HTTP_201_CREATED
+            answer['id'] = response.data.get('id')
         assert len(Answer.objects.all()) == len(self.answers)
         assert response is not None
         return response.data
@@ -150,7 +153,6 @@ class TestApiTest(APITestCase):
             data=answer,
             format='json'
         )
-        print([a.position for a in Answer.objects.all()])
         assert Answer.objects.get(id=pk).position == 1
         assert len(set(a.position for a in Answer.objects.filter(question_id=answer['question']).all())) == len(
             self.answers)

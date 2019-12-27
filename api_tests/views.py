@@ -7,9 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from analytics.models import SolvedTest
 from api_tests.serializers import *
 from users.models import User
-from utils.permissions import IsTeacherPost, IsAssistantOrTeacherPostPutDelete, allow_test_modification
+from utils.permissions import IsTeacherPost, IsAssistantOrTeacherPostPutDelete, allow_test_modification, IsStudent
 
 
 class TestView(viewsets.ModelViewSet):
@@ -160,7 +161,7 @@ class AnswerView(viewsets.ModelViewSet):
                             status=status.HTTP_403_FORBIDDEN)
         return super().create(request, args, kwargs)
 
-    def update(self, request:Request, *args, **kwargs):
+    def update(self, request: Request, *args, **kwargs):
         if not allow_test_modification(request.user, Test.objects.get(
                 id=Question.objects.get(id=request.data.get('question')).test_id)):
             return Response(data={'detail': 'Only teacher and his assistants can update'},
@@ -188,20 +189,23 @@ class AnswerView(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated, IsAssistantOrTeacherPostPutDelete])
 def allow_test(request: Request, *args, **kwargs):
     data = request.data
-    user = User.objects.filter(email=data.get('email')).first()
-    test = Test.objects.filter(id=data.get('test_id')).first()
+    user = User.objects.filter(email=data.get('student')).first()
+    test = Test.objects.filter(id=data.get('test')).first()
     if not user or not test:
         return Response(data={'detail': 'Some of the resources do not exist'}, status=status.HTTP_400_BAD_REQUEST)
     if not user.is_student():
         return Response(data={'detail': 'The user is not a student'}, status=status.HTTP_400_BAD_REQUEST)
     if request.method == 'POST':
         try:
-            StudentTest.objects.create(student=user.student, test_id=data.get('test_id'))
+            st = StudentTest.objects.create(student=user.student, test_id=data.get('test'))
+            return Response({'id': st.id}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'detail': str(e)}, status.HTTP_400_BAD_REQUEST)
     if request.method == 'DELETE':
         try:
-            StudentTest.objects.get(student=user.student, test_id=data.get('test_id')).delete()
+            StudentTest.objects.get(student=user.student, test_id=data.get('test')).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'detail': str(e)}, status.HTTP_400_BAD_REQUEST)
-    return Response(data={'result': 'success'}, status=status.HTTP_201_CREATED)
+    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+

@@ -13,11 +13,18 @@ class SolvedTest(AbstractCreateUpdateModel):
     student = models.ForeignKey(Student, null=True, on_delete=models.SET_NULL, db_index=True,
                                 related_name='solved_tests')
     mark = models.IntegerField(default=0)
+    is_checked = models.BooleanField(default=False)
 
     def set_mark(self):
         self.mark = int(100 * (len(list(filter(lambda x: x.correct, self.solved_questions.all()))) / len(
             self.test.questions.all())))
         self.save()
+
+    def check_test(self):
+        self.is_checked = True
+        for question in self.solved_questions.all():
+            question.set_correct()
+        self.set_mark()
 
 
 class SolvedQuestion(AbstractCreateUpdateModel):
@@ -30,8 +37,8 @@ class SolvedQuestion(AbstractCreateUpdateModel):
     correct = models.BooleanField(default=False)
 
     def set_correct(self):
-        self.correct = list(map(lambda x: x.answer.is_right, self.solved_answers.all())) == list(
-            map(lambda x: x.is_right, self.question.answers.all()))
+        self.correct = list(map(lambda x: x.answer, self.solved_answers.all())) == list(
+            filter(lambda x: x.is_right, self.question.answers.all()))
         self.save()
 
 
@@ -44,16 +51,16 @@ class SolvedAnswer(AbstractCreateUpdateModel):
                                         related_name='solved_answers')
     answer = models.ForeignKey(Answer, null=False, on_delete=models.CASCADE, related_name='solutions')
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        saved = super().save(force_insert, force_update, using, update_fields)
-        self.solved_question.set_correct()
-        self.solved_question.solved_test.set_mark()
-        return saved
-
-    def delete(self, using=None, keep_parents=False):
-        question = self.solved_question
-        test = self.solved_question.solved_test
-        deleted = super().delete(using, keep_parents)
-        question.set_correct()
-        test.set_mark()
-        return deleted
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     saved = super().save(force_insert, force_update, using, update_fields)
+    #     self.solved_question.set_correct()
+    #     self.solved_question.solved_test.set_mark()
+    #     return saved
+    #
+    # def delete(self, using=None, keep_parents=False):
+    #     question = self.solved_question
+    #     test = self.solved_question.solved_test
+    #     deleted = super().delete(using, keep_parents)
+    #     question.set_correct()
+    #     test.set_mark()
+    #     return deleted

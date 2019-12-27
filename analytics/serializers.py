@@ -11,7 +11,10 @@ class SolvedTestSerializer(serializers.ModelSerializer):
         read_only_fields = ['student', 'mark']
 
     def create(self, validated_data):
-        validated_data['student'] = self.context['request'].user.student
+        student = self.context['request'].user.student
+        validated_data['student'] = student
+        if validated_data['test'] not in (i.test for i in student.tests.all()):
+            raise ValueError('Student is not allowed to try this test')
         data = super().create(validated_data)
         return data
 
@@ -25,6 +28,8 @@ class SolvedQuestionSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs.get('question') not in attrs.get('solved_test').test.questions.all():
             raise ValueError('This question is not in this test')
+        if attrs.get('solved_test').is_checked:
+            raise ValueError('Test is already checked')
         return super().validate(attrs)
 
 
@@ -32,3 +37,8 @@ class SolvedAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = SolvedAnswer
         fields = ['id', 'solved_question', 'answer']
+
+    def validate(self, attrs):
+        if attrs.get('solved_question').solved_test.is_checked:
+            raise ValueError('Test is already checked')
+        return super().validate(attrs)
