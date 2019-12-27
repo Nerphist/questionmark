@@ -7,8 +7,8 @@ from users.serializers import StudentSerializer
 class SolvedTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = SolvedTest
-        fields = ['id', 'test', 'student', 'mark']
-        read_only_fields = ['student', 'mark']
+        fields = ['id', 'test', 'student', 'mark', 'is_checked']
+        read_only_fields = ['student', 'mark', 'is_checked']
 
     def create(self, validated_data):
         student = self.context['request'].user.student
