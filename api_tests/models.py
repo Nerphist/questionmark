@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 # Create your models here.
@@ -61,3 +63,11 @@ class StudentTest(AbstractCreateUpdateModel):
 
     test = models.ForeignKey(Test, null=False, on_delete=models.CASCADE, related_name='students')
     student = models.ForeignKey(Student, null=False, on_delete=models.CASCADE, related_name='tests')
+
+
+class AnonymousLink(AbstractCreateUpdateModel):
+    class Meta(AbstractCreateUpdateModel.Meta):
+        db_table = 'anonymous_links'
+
+    uuid_token = models.UUIDField(unique=True, db_index=True, default=uuid.uuid4)
+    test = models.ForeignKey(Test, on_delete=models.CASCADE, null=False, related_name='links')

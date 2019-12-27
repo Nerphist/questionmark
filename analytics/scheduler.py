@@ -3,6 +3,7 @@ import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from analytics.models import SolvedTest
+from api_tests.models import AnonymousLink
 from users.models import User
 
 
@@ -15,6 +16,8 @@ def delete_temp_users():
                     test.check_test()
             user.student.delete()
             user.delete()
+    for link in AnonymousLink.objects.filter(created__lt=datetime.datetime.now() - datetime.timedelta(hours=24)):
+        link.delete()
 
 
 class AnalyticsScheduler:

@@ -17,4 +17,6 @@ urlpatterns = [
     }), name='assistants'),
     path('token/refresh/', token_refresh, name='token_refresh'),
     path('get-role/', get_user_role, name='get_role'),
+    path('create-test-link/', generate_link, name='generate link'),
+    path('anonymous/', anonymous_user, name='login anonymous'),
 ]
