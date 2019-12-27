@@ -130,9 +130,9 @@ class QuestionView(viewsets.ModelViewSet):
             test_in_progress = SolvedTest.objects.filter(student=request.user.student, test_id=test_id,
                                                          is_checked=False).first()
             if test_in_progress:
-                questions = [q.question_id for q in test_in_progress.solved_questions.all()]
-                if questions:
-                    filters.append(~Q(id__in=questions))
+                questions_solved = [q.question_id for q in test_in_progress.solved_questions.all()]
+                if questions_solved:
+                    filters.append(~Q(id__in=questions_solved))
         if filters:
             questions = questions.filter(reduce(lambda x, y: x & y, filters))
         if ordering:
