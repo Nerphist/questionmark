@@ -10,8 +10,17 @@ from utils.permissions import IsStudent
 
 class SolvedTestView(viewsets.ModelViewSet):
     queryset = SolvedTest.objects.all()
-    permission_classes = (IsAuthenticated, IsStudent)
+    permission_classes = (IsAuthenticated, )
     serializer_class = SolvedTestSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        if request.user.is_student():
+            queryset = queryset.filter(student=request.user.student)
+        elif request.user.is_teacher():
+            queryset = queryset.filter(test__creator=request.user.teacher)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class SolvedQuestionView(viewsets.ModelViewSet):

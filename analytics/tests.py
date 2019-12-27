@@ -110,3 +110,7 @@ class AnalyticsTest(APITestCase):
             format='json'
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+        response = self.test_api.client.get(
+            path=reverse('solved tests')
+        )
+        print(response.data)
