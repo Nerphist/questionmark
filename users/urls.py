@@ -12,6 +12,7 @@ urlpatterns = [
         'post': 'create',
         'get': 'list',
     }), name='teachers'),
+    path('get_user_info/', get_user_info, name='users'),
     path('assistants/', AssistantView.as_view({
         'post': 'create',
     }), name='assistants'),

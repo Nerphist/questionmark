@@ -76,3 +76,10 @@ def get_user_role(request: Request, *args, **kwargs):
     else:
         role = 'student'
     return Response({'role': role}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_info(request: Request, *args, **kwargs):
+    ser = UserSerializer(request.user)
+    return Response(ser.data)
